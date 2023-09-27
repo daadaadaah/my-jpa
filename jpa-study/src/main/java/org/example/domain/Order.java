@@ -1,6 +1,8 @@
 package org.example.domain;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -8,6 +10,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -19,13 +24,31 @@ public class Order {
     @Column(name = "ORDER_ID")
     private Long id;
 
-    @Column(name = "MEMBER_ID")
-    private Long memberId;
+    @ManyToOne
+    @JoinColumn(name = "MEMBER_ID")
+    private Member member;
+
+    /**
+     * OrderItem의 ORDER_ID라는 외래키가 위치해 있으므로,
+     * 연관관계 주인이 OrderItem의 order 이다.
+     * 따라서, mappedBy = "order"로 설정
+     */
+    @OneToMany(mappedBy = "order")
+    private List<OrderItem> orderItems = new ArrayList<>(); // 예제상 추가한 거지, Order에 orderItems가 있는 건 좋지 못한 설계다.
 
     private LocalDateTime orderDate; // order_date
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    /**
+     * 연관관계 편의 메소드
+     * - 한 번에 양방향 관계를 설정하는 메서드
+     */
+    public void addOrderItem(OrderItem orderItem) {
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
 
     public Long getId() {
         return id;
@@ -35,12 +58,12 @@ public class Order {
         this.id = id;
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public Member getMember() {
+        return member;
     }
 
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
+    public void setMember(Member member) {
+        this.member = member;
     }
 
     public LocalDateTime getOrderDate() {

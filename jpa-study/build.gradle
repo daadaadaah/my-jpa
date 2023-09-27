@@ -12,7 +12,7 @@ repositories {
 dependencies {
 
     // JPA 하이버네이트
-    implementation 'org.hibernate:hibernate-entitymanager:5.3.10.Final'
+    implementation 'org.hibernate:hibernate-entitymanager:5.4.22.Final'
 
     // H2 데이터베이스
     implementation 'com.h2database:h2:1.4.200'

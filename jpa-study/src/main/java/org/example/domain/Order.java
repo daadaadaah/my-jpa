@@ -3,6 +3,7 @@ package org.example.domain;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -30,7 +31,7 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "MEMBER_ID")
     private Member member;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "DELIVERY_ID")
     private Delivery delivery;
 
@@ -39,7 +40,7 @@ public class Order extends BaseEntity {
      * 연관관계 주인이 OrderItem의 order 이다.
      * 따라서, mappedBy = "order"로 설정
      */
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>(); // 예제상 추가한 거지, Order에 orderItems가 있는 건 좋지 못한 설계다.
 
     private LocalDateTime orderDate; // order_date

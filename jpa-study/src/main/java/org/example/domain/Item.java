@@ -15,7 +15,7 @@ import javax.persistence.ManyToMany;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "DTYPE")
-public abstract class Item { // Item 만 단독으로 저장할 일이 없다는 상황을 가정해서 abstract 추가함
+public abstract class Item extends BaseEntity { // Item 만 단독으로 저장할 일이 없다는 상황을 가정해서 abstract 추가함
 
     @Id @GeneratedValue
     @Column(name = "ITEM_ID")

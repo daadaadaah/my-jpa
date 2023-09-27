@@ -14,7 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 @Entity
-public class Category {
+public class Category extends BaseEntity {
 
     @Id @GeneratedValue
     @Column(name = "CATEGORY_ID")

@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // JPA 하이버네이트
+    implementation 'org.hibernate:hibernate-entitymanager:5.4.22.Final'
+
+    // H2 데이터베이스
+    implementation 'com.h2database:h2:1.4.200'
+
+    // https://yeonyeon.tistory.com/240
+    implementation 'javax.xml.bind:jaxb-api:2.3.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+sourceSets {
+    main {
+        output.resourcesDir = java.classesDirectory
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -9,6 +9,8 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.OrderSimpleQueryDto;
+import jpabook.jpashop.repository.OrderSimpleQueryRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderSimpleApiController {
 
     private final OrderRepository orderRepository;
+
+    private final OrderSimpleQueryRepository orderSimpleQueryRepository; //의존관계 주입
 
     /**
      * V1. 엔티티 직접 노출
@@ -139,33 +143,47 @@ public class OrderSimpleApiController {
      *     inner join
      *         delivery delivery2_
      *             on order0_.delivery_id=delivery2_.delivery_id
+     *
+     *
+     * V4 : 엔티티 조회 후 DTO로 변환하지 않고, JPA에서 바로 DTO로 조회
+     * - V3 보다 애플리케이션 네트워크 용량 최적화 -> 생각보다 효과는 미비
+     *
+     * [날라가는 쿼리]
+     *     select
+     *         order0_.order_id as col_0_0_,
+     *         member1_.name as col_1_0_,
+     *         order0_.order_date as col_2_0_,
+     *         order0_.status as col_3_0_,
+     *         delivery2_.city as col_4_0_,
+     *         delivery2_.street as col_4_1_,
+     *         delivery2_.zipcode as col_4_2_
+     *     from
+     *         orders order0_
+     *     inner join
+     *         member member1_
+     *             on order0_.member_id=member1_.member_id
+     *     inner join
+     *         delivery delivery2_
+     *             on order0_.delivery_id=delivery2_.delivery_id
+     *
+     * [V3 vs V4]
+     * (1) V3
+     * 장점 : 엔티티로 조회하면 리포지토리 재사용성도 좋고, 개발도 단순해진다
+     * 단점 : 네트워크 비용 V4보다 많이 나옴
+     *
+     * (2) V4
+     * 장점 : 네트워크 비용 V4보다 적게 나옴
+     * 단점 : 리포지토리 재사용성 떨어짐, API 스펙에 맞춘 코드가 리포지토리에 들어가는 단점
+     *
+     * <결론>
+     * 1. 우선 엔티티를 DTO로 변환하는 방법을 선택한다. (V2)
+     * 2. 필요하면 페치 조인으로 성능을 최적화 한다. 대부분의 성능 이슈가 해결된다. (V3)
+     * 3. 그래도 안되면 DTO로 직접 조회하는 방법을 사용한다. (V4)
+     * 4. 최후의 방법은 JPA가 제공하는 네이티브 SQL이나 스프링 JDBC Template을 사용해서 SQL을 직접 사용한다.
+     *
      */
     @GetMapping("/api/simple-orders")
-    public List<SimpleOrderDto> ordersV2() {
-        List<Order> orders = orderRepository.findAllByString(new OrderSearch());
-
-        List<SimpleOrderDto> result = orders.stream()
-                .map(o -> new SimpleOrderDto(o))
-                .collect(toList());
-
-        return result;
-    }
-
-    @Data
-    static class SimpleOrderDto {
-
-        private Long orderId;
-        private String name;
-        private LocalDateTime orderDate; //주문시간
-        private OrderStatus orderStatus;
-        private Address address;
-
-        public SimpleOrderDto(Order order) {
-            orderId = order.getId();
-            name = order.getMember().getName(); // LAZY 초기화
-            orderDate = order.getOrderDate();
-            orderStatus = order.getStatus();
-            address = order.getDelivery().getAddress(); // LAZY 초기화
-        }
+    public List<OrderSimpleQueryDto> orders() {
+        return orderSimpleQueryRepository.findOrderDtos();
     }
 }

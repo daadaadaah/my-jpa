@@ -27,6 +27,10 @@ public class OrderSimpleApiController {
      * [문제]
      * - 무한 루프에 빠짐(https://github.com/daadaadaah/my-jpa/issues/3)
      *
+     * [해결 1]
+     * 1. 양방향이 걸린 부분 중 한 쪽을 @JsonIgnore 걸어 준다.
+     * 2. Hibernate5Module 모듈 등록, 강제 지연 로딩 true로 설정
+     *
      */
     @GetMapping("/api/simple-orders")
     public List<Order> orders() {

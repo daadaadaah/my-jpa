@@ -31,10 +31,21 @@ public class OrderSimpleApiController {
      * 1. 양방향이 걸린 부분 중 한 쪽을 @JsonIgnore 걸어 준다.
      * 2. Hibernate5Module 모듈 등록, 강제 지연 로딩 true로 설정
      *
+     * [해결 2]
+     * 1. 양방향이 걸린 부분 중 한 쪽을 @JsonIgnore 걸어 준다.
+     * 2. Hibernate5Module 모듈 등록, 선택적으로 LAZY 로딩 강제 초기화
+     *
      */
     @GetMapping("/api/simple-orders")
     public List<Order> orders() {
         List<Order> all = orderRepository.findAllByString(new OrderSearch());
+
+        for (Order order : all) {
+            order.getMember().getName(); // 선택적으로 Lazy 강제 초기화
+            order.getDelivery().getAddress(); // 선택적으로 Lazy 강제 초기화
+            
+        }
+
         return all;
     }
 }

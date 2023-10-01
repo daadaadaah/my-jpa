@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -25,4 +26,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // 단순히 값 하나 조회
     @Query("select m.username from Member m")
     List<String> findUsernameList();
+
+    // DTO 조회
+    @Query("select new study.datajpa.dto.MemberDto(m.id, m.username, t.name) from Member m join m.team t")
+    List<MemberDto> findMemberDto();
 }

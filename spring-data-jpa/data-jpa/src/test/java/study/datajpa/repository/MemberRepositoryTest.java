@@ -1,5 +1,6 @@
 package study.datajpa.repository;
 
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,9 @@ class MemberRepositoryTest {
 
     @Autowired
     TeamRepository teamRepository;
+
+    @Autowired
+    EntityManager em;
 
     @Test
     public void testMember() {
@@ -119,5 +123,43 @@ class MemberRepositoryTest {
         List<Member> result = memberRepository.findByUsername("member5");
 
         Assertions.assertThat(result.get(0).getAge()).isEqualTo(41); // 테스트 성공
+    }
+
+    /**
+     * LazyLoading시, N+1 문제 발생
+     *
+     * <날라가는 쿼리>
+     * select m1_0.member_id,m1_0.age,m1_0.team_id,m1_0.username from member m1_0
+     *
+     * select t1_0.team_id,t1_0.name from team t1_0 where t1_0.team_id=?
+     * select t1_0.team_id,t1_0.name from team t1_0 where t1_0.team_id=?
+     */
+    @Test
+    public void findMemberLazyLoading() {
+        // given
+        // member1 -> teamA
+        // member2 -> teamB
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+
+        Member member1 = new Member("member1", 40, teamA);
+        Member member2 = new Member("member2", 40, teamB);
+
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        em.flush();
+        em.clear();
+
+        List<Member> members = memberRepository.findAll();
+
+        for (Member member : members) {
+            System.out.println("member = " + member.getUsername());
+            System.out.println("member.team = " + member.getTeam().getName());
+        }
     }
 }

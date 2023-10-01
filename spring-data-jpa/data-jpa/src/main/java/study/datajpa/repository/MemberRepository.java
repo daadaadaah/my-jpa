@@ -1,6 +1,8 @@
 package study.datajpa.repository;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -59,4 +61,12 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
 
     @EntityGraph(attributePaths = {"team"}) // Member 조회시, team도 같이 조회할꺼야
     List<Member> findEntityGraphByUsername(@Param("username") String username);
+
+    /**
+     * 네이티브 쿼리 -> 네이티브 SQL을 DTO로 조회할 때에는 JDBC Template or myBatis를 사용하는 걸 권장함
+     * - 가급적 네이티브 쿼리는 사용하지 않은게 좋음. 정말 어쩔 수 없을 때 사용
+     * - DTO를 뽑는데, 좀 더 편하게 뽑을 수 있는거, 그런데 네이티브 쿼리야, 그런데 동적 쿼리는 아니야 할 때, 스프링 데이터 Projections 활용해보자.
+     */
+    @Query(value = "select * from member where username = ?", nativeQuery = true)
+    Member findByNativeQuery(String username);
 }

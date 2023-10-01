@@ -162,4 +162,39 @@ class MemberRepositoryTest {
             System.out.println("member.team = " + member.getTeam().getName());
         }
     }
+
+    /**
+     * LazyLoading시, N+1 문제 발생 : FetchJoin으로 해결
+     *
+     * <날라가는 쿼리>
+     * select m1_0.member_id,m1_0.age,t1_0.team_id,t1_0.name,m1_0.username from member m1_0 left join team t1_0 on t1_0.team_id=m1_0.team_id     *
+     */
+    @Test
+    public void findMemberFetchJoin() {
+        // given
+        // member1 -> teamA
+        // member2 -> teamB
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+
+        Member member1 = new Member("member1", 40, teamA);
+        Member member2 = new Member("member2", 40, teamB);
+
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        em.flush();
+        em.clear();
+
+        List<Member> members = memberRepository.findMemberFetchJoin();
+
+        for (Member member : members) {
+            System.out.println("member = " + member.getUsername());
+            System.out.println("member.team = " + member.getTeam().getName());
+        }
+    }
 }

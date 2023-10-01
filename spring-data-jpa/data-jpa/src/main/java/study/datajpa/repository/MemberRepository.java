@@ -1,6 +1,7 @@
 package study.datajpa.repository;
 
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -46,4 +47,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
      */
     @Query("select m from Member m left join fetch m.team")
     List<Member> findMemberFetchJoin();
+
+    @Override
+    @EntityGraph(attributePaths = {"team"}) // Member 조회시, team도 같이 조회할꺼야
+    List<Member> findAll();
 }

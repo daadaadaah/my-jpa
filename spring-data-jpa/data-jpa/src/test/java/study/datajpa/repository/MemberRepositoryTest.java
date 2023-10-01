@@ -128,11 +128,16 @@ class MemberRepositoryTest {
     /**
      * LazyLoading시, N+1 문제 발생
      *
+     * [EntityGraph 적용 전]
      * <날라가는 쿼리>
      * select m1_0.member_id,m1_0.age,m1_0.team_id,m1_0.username from member m1_0
      *
      * select t1_0.team_id,t1_0.name from team t1_0 where t1_0.team_id=?
      * select t1_0.team_id,t1_0.name from team t1_0 where t1_0.team_id=?
+     *
+     * [EntityGraph 적용 후]
+     * <날라가는 쿼리>
+     * select m1_0.member_id,m1_0.age,t1_0.team_id,t1_0.name,m1_0.username from member m1_0 left join team t1_0 on t1_0.team_id=m1_0.team_id
      */
     @Test
     public void findMemberLazyLoading() {

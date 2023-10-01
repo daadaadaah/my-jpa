@@ -1,7 +1,5 @@
 package study.datajpa.repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,9 +21,6 @@ class MemberRepositoryTest {
 
     @Autowired
     TeamRepository teamRepository;
-
-    @PersistenceContext
-    EntityManager em;
 
     @Test
     public void testMember() {
@@ -120,9 +115,6 @@ class MemberRepositoryTest {
         int resultCount = memberRepository.bulkAgePlus(20);
 
         Assertions.assertThat(resultCount).isEqualTo(3);
-
-        em.flush();
-        em.clear();
 
         List<Member> result = memberRepository.findByUsername("member5");
 

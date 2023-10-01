@@ -103,4 +103,21 @@ class MemberRepositoryTest {
 
         Assertions.assertThat(result).isEqualTo(3);
     }
+
+    @Test
+    public void bulkAgePlus2() {
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 19));
+        memberRepository.save(new Member("member3", 20));
+        memberRepository.save(new Member("member4", 21));
+        memberRepository.save(new Member("member5", 40));
+
+        int resultCount = memberRepository.bulkAgePlus(20);
+
+        Assertions.assertThat(resultCount).isEqualTo(3);
+
+        List<Member> result = memberRepository.findByUsername("member5");
+
+        Assertions.assertThat(result.get(0).getAge()).isEqualTo(41); // 테스트 실패 : 40임!
+    }
 }

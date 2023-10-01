@@ -10,6 +10,8 @@ import study.datajpa.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
+    List<Member> findByUsername(String username); // bulkAgePlus2 테스트용으로 추가
+
     /**
      * [스프링 데이터 JPA가 제공하는 쿼리 메소드 기능 1] 메서드 이름으로 쿼리 생성
      * 네이밍 참고 : https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods.query-creation

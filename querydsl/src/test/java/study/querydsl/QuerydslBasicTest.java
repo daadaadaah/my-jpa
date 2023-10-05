@@ -258,6 +258,41 @@ public class QuerydslBasicTest {
     }
 
     /**
+     * 내부 조인일 때, on도 사용할 수 있지만, 익숙한 where을 사용하고, 외부 조인일 때에는 on 사용하자
+     */
+    @Test
+    public void innerJoinOnVsWhere() {
+        // 회원과 팀을 조인하는데, 회원은 모두 조회되고, 팀은 팀 이름이 teamA인 팀만 조회도도록 하기
+        List<Tuple> resultWithOn = queryFactory
+            .select(member, team)
+            .from(member)
+            .join(member.team, team)
+            .on(team.name.eq("teamA"))
+            .fetch();
+
+        List<Tuple> resultWithWhere = queryFactory
+            .select(member, team)
+            .from(member)
+            .join(member.team, team)
+            .where(team.name.eq("teamA"))
+            .fetch();
+
+        /**
+         * tuple = [Member(id=1, username=member1, age=10), Team(id=1, name=teamA)]
+         * tuple = [Member(id=2, username=member2, age=20), Team(id=1, name=teamA)]
+         */
+        assertThat(resultWithOn).isEqualTo(resultWithWhere);
+
+        for (Tuple tuple : resultWithOn) {
+            System.out.println("[resultWithOn] tuple = " + tuple);
+        }
+
+        for (Tuple tuple : resultWithWhere) {
+            System.out.println("[resultWithWhere] tuple = " + tuple);
+        }
+    }
+
+    /**
      * 세타 조인
      * - 연관관계 없는 필드로 조인
      * - from 절에 여러 엔티티를 선택해서 세타 조인
@@ -282,4 +317,86 @@ public class QuerydslBasicTest {
             .extracting("username")
             .containsExactly("teamA", "teamB");
     }
+
+
+    /**
+     * 회원과 팀을 조인하는데, 회원은 모두 조회되고(Member m LEFT JOIN m.team t), 팀은 팀 이름이 teamA인 팀만 조회(on t.name = 'teamA')되도록 하기
+     * <날라간 JPQL> : SELECT m, t FROM Member m LEFT JOIN m.team t on t.name = 'teamA'
+     * select
+     *         member1,
+     *         team
+     *     from
+     *         Member member1
+     *     left join
+     *         member1.team as team with team.name = ?1
+     *
+     * <날라간 SQL> : SELECT m.*, t.* FROM Member m LEFT JOIN Team t ON m.TEAM_ID=t.id and t.name='teamA'
+     * select
+     *             m1_0.member_id,
+     *             m1_0.age,
+     *             m1_0.team_id,
+     *             m1_0.username,
+     *             t1_0.team_id,
+     *             t1_0.name
+     *         from
+     *             member m1_0
+     *         left join
+     *             team t1_0
+     *                 on t1_0.team_id=m1_0.team_id
+     *                 and t1_0.name=?
+     *
+     */
+    @Test
+    public void JoinOn_leftOuterJoinYesRelation() {
+        // 억지성 예제임
+        // 회원의 이름이 팀 이름과 같은 회워 조회
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+
+        List<Tuple> result = queryFactory
+            .select(member, team)
+            .from(member)
+            .leftJoin(member.team, team) // 연관관계 있는 필드끼리 leftJoin
+            .on(team.name.eq("teamA"))
+            .fetch();
+
+        /**
+         * tuple = [Member(id=1, username=member1, age=10), Team(id=1, name=teamA)]
+         * tuple = [Member(id=2, username=member2, age=20), Team(id=1, name=teamA)]
+         * tuple = [Member(id=3, username=member3, age=30), null]
+         * tuple = [Member(id=4, username=member4, age=40), null]
+         */
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+    }
+
+    /**
+     * 세타 조인
+     * - 연관관계 없는 필드로 조인
+     * - 조인 on을 사용하면, 외부 조인 가능
+     */
+    @Test
+    public void JoinOn_leftOuterJoinWithNoRelation() {
+        List<Tuple> result = queryFactory
+            .select(member, team)
+            .from(member)
+            .leftJoin(team) // 연관관계 없는 필드끼리 leftJoin
+            .on(member.username.eq(team.name))
+            .fetch();
+        /**
+         * tuple = [Member(id=1, username=member1, age=10), null]
+         * tuple = [Member(id=2, username=member2, age=20), null]
+         * tuple = [Member(id=3, username=member3, age=30), null]
+         * tuple = [Member(id=4, username=member4, age=40), null]
+         * tuple = [Member(id=5, username=teamA, age=0), Team(id=1, name=teamA)]
+         * tuple = [Member(id=6, username=teamB, age=0), Team(id=2, name=teamB)]
+         * tuple = [Member(id=7, username=teamC, age=0), null]
+         */
+        for (Tuple tuple : result) {
+            System.out.println("t=" + tuple);
+        };
+    }
+
 }

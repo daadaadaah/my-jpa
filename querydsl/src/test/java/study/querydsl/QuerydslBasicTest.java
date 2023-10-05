@@ -2,8 +2,10 @@ package study.querydsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static study.querydsl.entity.QMember.member;
+import static study.querydsl.entity.QTeam.team;
 
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -178,5 +180,66 @@ public class QuerydslBasicTest {
         assertThat(member5.getUsername()).isEqualTo("member5");
         assertThat(member6.getUsername()).isEqualTo("member6");
         assertThat(memberNull.getUsername()).isNull();
+    }
+
+    @Test
+    public void aggregation() throws Exception {
+        // 튜플 : 데이터 타입이 여러개 일 때 사용
+        // 그런데, 실무에서는 튜플보다 직접 DTO로 조회하는 방법을 주로 사용한다.
+        List<Tuple> result = queryFactory
+            .select(
+                member.count(),
+                member.age.sum(),
+                member.age.avg(),
+                member.age.max(),
+                member.age.min()
+            )
+            .from(member)
+            .fetch();
+
+        Tuple tuple = result.get(0);
+
+        assertThat(tuple.get(member.count())).isEqualTo(4);
+        assertThat(tuple.get(member.age.sum())).isEqualTo(100);
+        assertThat(tuple.get(member.age.avg())).isEqualTo(25);
+        assertThat(tuple.get(member.age.max())).isEqualTo(40);
+        assertThat(tuple.get(member.age.min())).isEqualTo(10);
+    }
+
+    @Test
+    public void group() throws Exception {
+        // 팀의 이름과 각 팀의 평균 연령을 구해라.
+        List<Tuple> result = queryFactory
+            .select(team.name, member.age.avg())
+            .from(member)
+            .join(member.team, team)
+            .groupBy(team.name)
+            .fetch();
+
+        Tuple teamA = result.get(0);
+        Tuple teamB = result.get(1);
+
+        assertThat(teamA.get(team.name)).isEqualTo("teamA");
+        assertThat(teamA.get(member.age.avg())).isEqualTo(15);
+
+        assertThat(teamB.get(team.name)).isEqualTo("teamB");
+        assertThat(teamB.get(member.age.avg())).isEqualTo(35);
+    }
+
+    @Test
+    public void groupWithHaving() throws Exception {
+        // A 팀의 이름과 각 팀의 평균 연령을 구해라.
+        List<Tuple> result = queryFactory
+            .select(team.name, member.age.avg())
+            .from(member)
+            .join(member.team, team)
+            .groupBy(team.name)
+            .having(team.name.eq("teamA")) // having을 이용해서, 그룹화된 결과를 제한할 수 있다.
+            .fetch();
+
+        Tuple teamA = result.get(0);
+
+        assertThat(teamA.get(team.name)).isEqualTo("teamA");
+        assertThat(teamA.get(member.age.avg())).isEqualTo(15);
     }
 }

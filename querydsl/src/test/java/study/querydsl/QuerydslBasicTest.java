@@ -1,6 +1,7 @@
 package study.querydsl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static study.querydsl.entity.QMember.member;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -52,10 +53,13 @@ public class QuerydslBasicTest {
         assertThat(findMember.getUsername()).isEqualTo("member1");
     }
 
+    /**
+     * 같은 테이블을 조인해야 하는 상황이라면, 다음과 같이 별칭을 직접 지정해서 사용하고
+     *      QMember qMember = new QMember("m"); //별칭 직접 지정
+     * 그렇지 않으면, Q-Tpye(예 : QMember) import해서 기본 인스턴스를 사용하자
+     */
     @Test
     public void startQuerydsl() {
-        QMember member = new QMember("m");
-
         Member findMember = queryFactory
                                     .select(member)
                                     .from(member)

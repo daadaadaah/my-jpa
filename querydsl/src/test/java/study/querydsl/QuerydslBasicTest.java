@@ -3,8 +3,10 @@ package study.querydsl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static study.querydsl.entity.QMember.member;
 
+import com.querydsl.core.QueryResults;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,5 +99,60 @@ public class QuerydslBasicTest {
                                     .fetchOne();
 
         assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void resultFetch() {
+        List<Member> fetchMembers = queryFactory
+            .selectFrom(member)
+            .fetch(); // 리스트 조회, 데이터 없으면 빈 리스트 반환
+
+        assertThat(fetchMembers.size()).isEqualTo(4);
+    }
+
+    @Test
+    public void resultFetchOne() {
+        Member findMember = queryFactory
+            .selectFrom(member)
+            .where(member.username.eq("member1"))
+            .fetchOne(); // 단 건 조회, 결과가 없으면 null, 결과가 둘 이상이면 com.querydsl.core.NonUniqueResultException 발생
+
+        assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void resultFetchFirst() {
+        Member findMember = queryFactory
+            .selectFrom(member)
+            .where(member.age.goe(10))
+            .fetchFirst(); // limit(1).fetchOne()
+
+        assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void resultFetchResults() {
+        QueryResults<Member> results = queryFactory
+            .selectFrom(member)
+            .where(member.age.goe(10))
+            .fetchResults(); // deprecated 됨
+
+        long count = results.getTotal();
+
+        List<Member> content = results.getResults();
+
+        assertThat(count).isEqualTo(4);
+
+        assertThat(content.get(0).getUsername()).isEqualTo("member1");
+    }
+
+    @Test
+    public void resultFetchCount() {
+        long count = queryFactory
+            .selectFrom(member)
+            .where(member.age.goe(10))
+            .fetchCount(); // deprecated 됨
+
+        assertThat(count).isEqualTo(4);
     }
 }

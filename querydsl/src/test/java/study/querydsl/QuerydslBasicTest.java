@@ -256,4 +256,30 @@ public class QuerydslBasicTest {
             .extracting("username")
             .containsExactly("member1", "member2");
     }
+
+    /**
+     * 세타 조인
+     * - 연관관계 없는 필드로 조인
+     * - from 절에 여러 엔티티를 선택해서 세타 조인
+     * - inner 조인만 가능했고, outer 조인 불가능했었다. -> 그러나, 조인 on을 사용하면, 외부 조인 가능
+     */
+    @Test
+    public void thetaJoin() {
+        // 억지성 예제임
+        // 회원의 이름이 팀 이름과 같은 회워 조회
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+        em.persist(new Member("teamC"));
+
+
+        List<Member> result = queryFactory
+            .select(member)
+            .from(member, team)
+            .where(member.username.eq(team.name))
+            .fetch();
+
+        assertThat(result)
+            .extracting("username")
+            .containsExactly("teamA", "teamB");
+    }
 }

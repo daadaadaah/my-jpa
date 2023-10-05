@@ -68,4 +68,34 @@ public class QuerydslBasicTest {
 
         assertThat(findMember.getUsername()).isEqualTo("member1");
     }
+
+    // 이름이 memeber1이면서, 나이가 10살이 사람 조회
+    @Test
+    public void searchAndVersion() {
+        Member findMember = queryFactory
+                                    .select(member)
+                                    .from(member)
+                                    .where(
+                                        member.username.eq("member1")
+                                        .and(member.age.eq(10))
+                                    )//파라미터 바인딩 처리
+                                    .fetchOne();
+
+        assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
+
+    // 이름이 memeber1이면서, 나이가 10살이 사람 조회
+    @Test
+    public void searchCommaVersion() { // 영한님 선호 방식!
+        Member findMember = queryFactory
+                                    .select(member)
+                                    .from(member)
+                                    .where(
+                                        member.username.eq("member1"),
+                                        member.age.eq(10)
+                                    )//파라미터 바인딩 처리
+                                    .fetchOne();
+
+        assertThat(findMember.getUsername()).isEqualTo("member1");
+    }
 }

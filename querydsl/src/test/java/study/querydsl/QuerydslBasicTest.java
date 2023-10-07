@@ -3,6 +3,7 @@ package study.querydsl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static study.querydsl.entity.QMember.member;
 import static study.querydsl.entity.QTeam.team;
+import static com.querydsl.jpa.JPAExpressions.*;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
@@ -435,4 +436,85 @@ public class QuerydslBasicTest {
         assertThat(isLoaded).as("fetch join 적용").isTrue();
     }
 
+    // where 절에서의 Subquery
+    @Test
+    public void subQuery() {
+        QMember memberSub = new QMember("memberSub"); // 메인 쿼리와 겹치지 않도록
+
+        // 나이가 가장 많은 회원 조회
+        List<Member> result = queryFactory
+            .selectFrom(member)
+            .where(member.age.eq(
+                    select(memberSub.age.max())
+                    .from(memberSub)
+            ))
+            .fetch();
+
+        assertThat(result).extracting("age").containsExactly(40);
+    }
+
+    // where 절에서의 Subquery
+    @Test
+    public void subQueryGoe() {
+        QMember memberSub = new QMember("memberSub"); // 메인 쿼리와 겹치지 않도록
+
+        // 나이가 평균 이상인 회원 조회
+        List<Member> result = queryFactory
+            .selectFrom(member)
+            .where(member.age.goe(
+                    select(memberSub.age.avg())
+                    .from(memberSub)
+            ))
+            .fetch();
+
+        assertThat(result).extracting("age").containsExactly(30, 40);
+    }
+
+
+    // where 절에서의 Subquery
+    @Test
+    public void subQueryIn() {
+        QMember memberSub = new QMember("memberSub"); // 메인 쿼리와 겹치지 않도록
+
+        // 나이가 10 초과인 회원 조회
+        List<Member> result = queryFactory
+            .selectFrom(member)
+            .where(member.age.in(
+                    select(memberSub.age)
+                    .from(memberSub)
+                    .where(memberSub.age.gt(10))
+            ))
+            .fetch();
+
+        assertThat(result).extracting("age").containsExactly(20, 30, 40);
+    }
+
+    // select 절에서의 Subquery
+    @Test
+    public void selectSubQuery() {
+        QMember memberSub = new QMember("memberSub"); // 메인 쿼리와 겹치지 않도록
+
+        List<Tuple> result = queryFactory
+            .select(
+                member.username,
+                select(memberSub.age.avg())
+                .from(memberSub)
+            )
+            .from(member)
+            .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("tuple = " + tuple);
+        }
+    }
+
+    /**
+     * from 절에서의 subquery
+     * JPA JPQL 서브쿼리의 한계점으로 from절의 서브쿼리(인라인 뷰)는 지원하지 않는다.
+     * 당연히 QueryDSL도 지원하지 않는다.
+     * <from절의 서브쿼리 해결방안>
+     * 방법 1. 서브쿼리를 join으로 변경한다. (가능한 상황도 있고, 불가능한 상황도 있다)
+     * 방법 2. 애플리케이션ㅇ네서 쿼리를 2번 분리해서 실행한다.
+     * 방법 3. nativeSQL을 사용한다.
+     */
 }

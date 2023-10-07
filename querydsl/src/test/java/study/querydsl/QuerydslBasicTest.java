@@ -6,6 +6,7 @@ import static study.querydsl.entity.QMember.member;
 import static study.querydsl.entity.QTeam.team;
 import static com.querydsl.jpa.JPAExpressions.*;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
@@ -593,6 +594,38 @@ public class QuerydslBasicTest {
         for (String s : result) {
             System.out.println("s = " + s); // s = member1_10
         }
+    }
+
+    /**
+     * 동적 쿼리를 해결하는 2가지 방법
+     * 방법 1. BooleanBuilder
+     * 방법 2. Where 다중 파라미터 사용
+     */
+    // 방법 1. BooleanBuilder
+    @Test
+    public void dynamicQuery_BooleanBuilder() {
+        String usernameParam = "member1";
+        Integer ageParam = 10;
+
+        List<Member> result = searchMember1(usernameParam, ageParam);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    // 파라미터 값이 Null인지 아닌지에 따라서 쿼리가 바뀌는 동적 쿼리
+    private List<Member> searchMember1(String usernameCond, Integer ageCond) {
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if (usernameCond != null) {
+            builder.and(member.username.eq(usernameCond));
+        }
+        if (ageCond != null) {
+            builder.and(member.age.eq(ageCond));
+        }
+
+        return queryFactory
+            .selectFrom(member)
+            .where(builder)
+            .fetch();
     }
 
 }

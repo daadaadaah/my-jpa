@@ -679,4 +679,38 @@ public class QuerydslBasicTest {
     private BooleanExpression allEq(String usernameCond, Integer ageCond) {
         return usernameEq(usernameCond).and(ageEq(ageCond)); // 단, null 체크는 주의해서 처리해야함
     }
+
+    /**
+     * 프로젝션 : select 대상 지정
+     * 1) 프로젝션 대상 하나
+     * 2) 프로젝션 대상 2이상이면, 튜플이나 DTO로 조회
+     */
+
+
+    // 프로젝션 대상이 1개일 경우
+    @Test
+    public void simpleProjection() {
+        List<String> result = queryFactory
+            .select(member.username)
+            .from(member)
+            .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    // 프로젝션 대상 2이상인 경우, Tuple
+    @Test
+    public void complexProjection() {
+        List<Tuple> result = queryFactory
+            .select(member.username, member.age)
+            .from(member)
+            .fetch();
+
+        for (Tuple tuple : result) {
+            System.out.println("username=" + tuple.get(member.username));
+            System.out.println("age=" + tuple.get(member.age));
+        }
+    }
 }

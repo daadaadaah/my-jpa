@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
 import study.querydsl.dto.QMemberDto;
@@ -800,5 +801,76 @@ public class QuerydslBasicTest {
         for (MemberDto memberDto : result) {
             System.out.println("memberDto = " + memberDto);
         }
+    }
+
+    // JPQL 배치와 마찬가지로,
+    // 벌크 수정은 영속성 컨텍스트에 있는 엔티티를 무시하고 실행되기 때문에 배치 쿼리를 실행하고 나면
+    // 다음과 같은 명령어로 영속성 컨텍스트를 초기화 하는 것이 안전하다.
+    //   em.flush();
+    //   em.clear();
+    @Test
+    public void bulkUpdate() {
+        long count = queryFactory
+            .update(member)
+            .set(member.username, "비회원")
+            .where(member.age.lt(28))
+            .execute();
+
+        em.flush();
+        em.clear();
+
+        assertThat(count).isEqualTo(2);
+    }
+
+    @Test
+    public void bulkAdd() {
+        long count = queryFactory
+            .update(member)
+            .set(member.age, member.age.add(1))
+            .execute();
+
+        em.flush();
+        em.clear();
+
+        assertThat(count).isEqualTo(4);
+    }
+
+    @Test
+    public void bulkMinus() {
+        long count = queryFactory
+            .update(member)
+            .set(member.age, member.age.add(-1))
+            .execute();
+
+        em.flush();
+        em.clear();
+
+        assertThat(count).isEqualTo(4);
+    }
+
+    @Test
+    public void bulkMultiply() {
+        long count = queryFactory
+            .update(member)
+            .set(member.age, member.age.multiply(2))
+            .execute();
+
+        em.flush();
+        em.clear();
+
+        assertThat(count).isEqualTo(4);
+    }
+
+    @Test
+    public void bulkDelete() {
+        long count = queryFactory
+            .delete(member)
+            .where(member.age.gt(18)) // 18세 이상 회원 삭제
+            .execute();
+
+        em.flush();
+        em.clear();
+
+        assertThat(count).isEqualTo(3);
     }
 }

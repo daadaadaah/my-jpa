@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import study.querydsl.dto.MemberDto;
+import study.querydsl.dto.QMemberDto;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.QMember;
 import study.querydsl.entity.Team;
@@ -736,10 +737,17 @@ public class QuerydslBasicTest {
     }
 
     /**
-     * QueryDSL은 DTO로 결과를 반활할 때, 3가지 방법 지원함
+     * QueryDSL은 DTO로 결과를 반활할 때, 4가지 방법 지원함
      * 방법 1. 프로퍼티 접근
      * 방법 2. 필드 직접 접근
      * 방법 3. 생성자 사용
+     * 방법 4. @QueryProjection 활용
+     *
+     * 그래서, 4가지 방법 중 어느 것 선택?
+     * 상황에 맞는 선택을 하면 된다.
+     * 생성자를 사용하면 객체 생성 시점에 필요한 값들을 한 번에 할당할 수 있어, 객체의 불변성을 유지하는데 도움이 됩니다.
+     * 다만 생성자의 인자 수가 많아질수록 코드가 복잡해질 수 있습니다.
+     * 추가로 @QueryProjection을 사용하면 컴파일 시점에 오류를 발견할 수 있으며, 코드가 간결하고 가독성이 좋습니다. 단점으로는 엔티티 클래스에 Querydsl 관련 코드가 추가되므로, 도메인 객체와 쿼리 코드의 결합도가 증가합니다.
      */
     @Test
     public void findDtoByQueryDSL_Setter() { // 방법 1. 프로퍼티 접근
@@ -769,6 +777,23 @@ public class QuerydslBasicTest {
     public void findDtoByQueryDSL_Constructor() { // 방법 3. 생서자 접근
         List<MemberDto> result = queryFactory
             .select(Projections.constructor(MemberDto.class, member.username, member.age))
+            .from(member)
+            .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    /**
+     * 방법 4. @QueryProjection 활용
+     * 이 방법은 컴파일러로 타입을 체크할 수 있으므로 가장 안전한 방법이다.
+     * 다만, DTO에 QueryDSL 어노테 이션을 유지해야 하는 점(DTO가 QueryDSL에 의존성이 생김)과 DTO까지 Q 파일을 생성해야 하는 단점이 있다.
+     */
+    @Test
+    public void findDtoByQueryDSL_QueryProjection() {
+        List<MemberDto> result = queryFactory
+            .select(new QMemberDto(member.username, member.age))
             .from(member)
             .fetch();
 

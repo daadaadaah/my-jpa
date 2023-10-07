@@ -1,5 +1,6 @@
 package study.querydsl;
 
+import static com.querydsl.core.types.ExpressionUtils.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static study.querydsl.entity.QMember.member;
 import static study.querydsl.entity.QTeam.team;
@@ -7,7 +8,10 @@ import static com.querydsl.jpa.JPAExpressions.*;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -554,4 +558,41 @@ public class QuerydslBasicTest {
             System.out.println("s = " + s);
         }
     }
+
+    @Test
+    public void constant() {
+        List<Tuple> result = queryFactory
+            .select(member.username, as(Expressions.constant("A"), "data1"))
+            .from(member)
+
+            .fetch();
+
+        /**
+         * s = [member1, A]
+         * s = [member2, A]
+         * s = [member3, A]
+         * s = [member4, A]
+         */
+
+        for (Tuple s : result) {
+            System.out.println("s = " + s.get(member.username));
+            System.out.println("a = " + s.get(ExpressionUtils.path(String.class, "data1")));
+        }
+    }
+
+    @Test
+    public void concat() {
+
+        // stringValue : 문자가 아닌 다른 타입들을 문자로 변환할 때 자주 사용한다. 특히, ENUM 처리할 때
+        List<String> result = queryFactory
+            .select(member.username.concat("_").concat(member.age.stringValue()))
+            .from(member)
+            .where(member.username.eq("member1"))
+            .fetch();
+
+        for (String s : result) {
+            System.out.println("s = " + s); // s = member1_10
+        }
+    }
+
 }

@@ -11,6 +11,7 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import study.querydsl.dto.MemberDto;
 import study.querydsl.entity.Member;
 import study.querydsl.entity.QMember;
 import study.querydsl.entity.Team;
@@ -711,6 +713,67 @@ public class QuerydslBasicTest {
         for (Tuple tuple : result) {
             System.out.println("username=" + tuple.get(member.username));
             System.out.println("age=" + tuple.get(member.age));
+        }
+    }
+
+    // 프로젝션 대상 2개이상인 경우, DTO
+    /**
+     * 순수 JPA에서 DTO를 조회할 때,
+     * - new 명령어를 사용해야 함.
+     * - DTO의 package 이름을 다 적어줘야해서 지저분함
+     * - 생성자 방식만 지원함
+     */
+    @Test
+    public void findDtoByJPQL() { // 순수 JPA에서 DTO를 조회할 때
+        List<MemberDto> result = em.createQuery(
+                "select new study.querydsl.dto.MemberDto(m.username, m.age) " +
+                    "from Member m", MemberDto.class)
+            .getResultList();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    /**
+     * QueryDSL은 DTO로 결과를 반활할 때, 3가지 방법 지원함
+     * 방법 1. 프로퍼티 접근
+     * 방법 2. 필드 직접 접근
+     * 방법 3. 생성자 사용
+     */
+    @Test
+    public void findDtoByQueryDSL_Setter() { // 방법 1. 프로퍼티 접근
+        List<MemberDto> result = queryFactory
+            .select(Projections.bean(MemberDto.class, member.username, member.age))
+            .from(member)
+            .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    public void findDtoByQueryDSL_Field() { // 방법 2. 필드 직접 접근
+        List<MemberDto> result = queryFactory
+            .select(Projections.fields(MemberDto.class, member.username, member.age))
+            .from(member)
+            .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    public void findDtoByQueryDSL_Constructor() { // 방법 3. 생서자 접근
+        List<MemberDto> result = queryFactory
+            .select(Projections.constructor(MemberDto.class, member.username, member.age))
+            .from(member)
+            .fetch();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
         }
     }
 }

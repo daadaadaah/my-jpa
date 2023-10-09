@@ -35,5 +35,6 @@
 - 다만, mybatis를 사용하더라도, 개발자가 SQL을 직접 작성해야 하므로, SQL에 의존하는 개발을 피할 수 없다.
 - 반면, JPA은 객체와 테이블을 매핑만하면, SQL을 알아서 만들어서 DB와 통신하므로, SQL에 의존하는 개발을 피할 수 있다.
 
-
+# JPA 잘 정리된 블로그
+- https://cheese10yun.github.io/tags/#JPA
 

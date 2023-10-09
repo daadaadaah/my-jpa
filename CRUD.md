@@ -1,5 +1,5 @@
-# Entity Create
-## JPA
+# 🎯 Entity Create
+## 🚀 JPA
 ### 연관관계가 없는 기본적인 엔티티
 ```java
 em.persist(memberA);
@@ -10,11 +10,12 @@ em.persist(memberA);
 ### 연관관계가 있는 엔티티
 - WIP
 
-## QueryDSL
-- WIP
+## 🚀 JPQL 또는 QueryDSL
 
-# Entity Read
-## JPA
+
+
+# 🎯 Entity Read
+## 🚀 JPA
 ### 연관관계가 없는 기본적인 엔티티
 ```java
 em.find(memberA);
@@ -32,12 +33,18 @@ em.find(memberA);
 ### 연관관계가 있는 엔티티
 - WIP
 
+### 연관관계가 없는 기본적인 엔티티
+- JPA는 영속성 컨텍스트에 엔티티가 있는지 조회 후 없으면 DB 조회를 하는 것과 달리, DB 조회 먼저 한 후 가져온 데이터가 영속성 컨텍스트에 동일한 값이 있다면 DB에서 가져온 값을 버리게 된다. 
 
-## QueryDSL
-- WIP
+## 🚀 JPQL 또는 QueryDSL
 
-# Entity Update
-## JPA
+
+## JPA와 JPQL이 다르게 동작하는 이유는 무엇일까?
+
+
+
+# 🎯 Entity Update
+## 🚀 JPA
 ### 연관관계가 없는 기본적인 엔티티
 - JPA로 엔티티를 수정할 떄, 단순히 엔티티를 조회해서 데이터만 변경하면 된다.
 - 왜냐하면, 엔티티의 변경사항을 DB에 자동반영하는 변경 감지 기능(dirty checking)이 있기 때문이다.
@@ -79,11 +86,11 @@ public class Member {
 - WIP
 
 
-## QueryDSL
+## 🚀 JPQL 또는 QueryDSL
 - WIP
 
-# Entity Delete
-## JPA
+# 🎯 Entity Delete
+## 🚀 JPA
 ### 연관관계가 없는 엔티티
 - 엔티티를 삭제하려면, 먼저 삭제 대상 엔티티를 조회해야 한다.
 ```java
@@ -95,14 +102,10 @@ em.remove(memberA);
 3. 이후 TX를 commit 해서 flush를 호출하면, 실제 DB에 삭제 쿼리가 전달된다.
 
 
-
-
-
 ### 연관관계가 있는 엔티티
 - WIP
 
 
-
-## QueryDSL
+## 🚀 JPQL 또는 QueryDSL
 - WIP
-
+  

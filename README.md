@@ -36,7 +36,7 @@
 1. 스프링 데이터 JPA에서 지원해주는 메소드들을 사용하기
 2. 복잡한 쿼리 중에 비교적 단순한 쿼리는 @Query로 JPQL 사용 -> 커스텀 클래스 없이 편리하게 개발 할 수 있는게 장점인데, 그것 말고는 사실 장점이 없다.
 3. 2번보다 복잡하면, QueryDSL로 처리
-- `XXXXRepositoryCustom 인터페이스`와 `XXXXRepositoryImpl implements MemberRepositoryCustom` 클래스 만들어서 구현부 완성 -> 이게 사실 귀찮긴 함. 그레도, 나중에 컴파일 시점에 문제들도 쉽게 찾을 수 있고 코드 추적도 쉬워서 더 좋다.
+- `XXXXRepositoryCustom 인터페이스`와 `XXXXRepositoryImpl implements MemberRepositoryCustom` 클래스 만들어서 구현부 완성 -> 이게 사실 귀찮긴 함. 그래도, 나중에 컴파일 시점에 문제들도 쉽게 찾을 수 있고 코드 추적도 쉬워서 더 좋다. 나도 QueryDSL이 더 좋은 것 같다. 물로 @Query에서도 애플리케이션 로딩 시점에 문제를 찾을 수 있지만, 그보다 더 빨리 컴파일 시점에 찾을 수 있으므로, 
 4. 동적 쿼리는 QueryDSL로 처리
 
 - 사실 자기가 속한 프로젝트 컨벤션 대로 작성하는게 최고, JPQL 을 선호하는 컨벤션이면 JPQL로, QueryDSL를 선호하는 컨벤션이면, QueryDSL로!

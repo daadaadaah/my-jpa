@@ -32,13 +32,14 @@
 > [영한님 팁](https://www.inflearn.com/questions/38771/querydsl%EA%B3%BC-jpql%EC%9D%84-%EC%84%A0%ED%83%9D%ED%95%98%EB%8A%94-%EC%B0%A8%EC%9D%B4%EA%B0%80-%EA%B6%81%EA%B8%88%ED%95%A9%EB%8B%88%EB%8B%A4) 
 <img width="533" alt="스크린샷 2023-10-10 오후 4 07 05" src="https://github.com/daadaadaah/my-jpa/assets/60481383/f39f73b7-8bfe-4f84-b866-0c6fc87ae55a">
 
-- 정리하면, (사실 자기가 속한 프로젝트 컨벤션 대로 작성하는게 최고, JPQL 을 선호하는 컨벤션이면 JPQL로, QueryDSL를 선호하는 컨벤션이면, QueryDSL로!)
+- 정리하면,
 1. 스프링 데이터 JPA에서 지원해주는 메소드들을 사용하기
 2. 복잡한 쿼리 중에 비교적 단순한 쿼리는 @Query로 JPQL 사용 -> 커스텀 클래스 없이 편리하게 개발 할 수 있는게 장점인데, 그것 말고는 사실 장점이 없다.
 3. 2번보다 복잡하면, QueryDSL로 처리
 - `XXXXRepositoryCustom 인터페이스`와 `XXXXRepositoryImpl implements MemberRepositoryCustom` 클래스 만들어서 구현부 완성 -> 이게 사실 귀찮긴 함. 그레도, 나중에 컴파일 시점에 문제들도 쉽게 찾을 수 있고 코드 추적도 쉬워서 더 좋다.
 4. 동적 쿼리는 QueryDSL로 처리
 
+- 사실 자기가 속한 프로젝트 컨벤션 대로 작성하는게 최고, JPQL 을 선호하는 컨벤션이면 JPQL로, QueryDSL를 선호하는 컨벤션이면, QueryDSL로!
 - 다음은 예시 코드다.
 
 ```java
